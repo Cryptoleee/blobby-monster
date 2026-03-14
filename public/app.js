@@ -12,9 +12,13 @@ const subtitle = document.getElementById('subtitle');
 const status = document.getElementById('status');
 const audioPlayer = document.getElementById('audioPlayer');
 const mouth = document.getElementById('mouth');
+
 // ---- State ----
 let isRecording = false;
 let recognition = null;
+let useMediaRecorder = false;
+let mediaRecorder = null;
+let audioChunks = [];
 
 const subtitleMessages = [
   'Tik op mij en zeg iets geks!',
@@ -27,18 +31,27 @@ const subtitleMessages = [
 ];
 
 // ---- Initialize ----
-setupSpeechRecognition();
+setupSpeechInput();
 
-// ---- Speech Recognition ----
-function setupSpeechRecognition() {
+// ---- Speech Input Setup ----
+function setupSpeechInput() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    status.textContent = 'Oeps! Je browser kan Blobby niet horen. Probeer Chrome of Safari!';
+  if (SpeechRecognition) {
+    // Use native Web Speech API (desktop Chrome, Android Chrome)
+    setupWebSpeechAPI(SpeechRecognition);
+  } else if (navigator.mediaDevices && window.MediaRecorder) {
+    // Fallback: MediaRecorder + Google Cloud STT (iOS, Firefox, etc.)
+    useMediaRecorder = true;
+    console.log('Web Speech API not available — using MediaRecorder + Google Cloud STT');
+  } else {
+    status.textContent = 'Oeps! Je browser kan Blobby niet horen. Probeer Chrome!';
     talkBtn.disabled = true;
-    return;
   }
+}
 
+// ---- Web Speech API (primary) ----
+function setupWebSpeechAPI(SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.continuous = false;
   recognition.interimResults = true;
@@ -93,6 +106,124 @@ function setupSpeechRecognition() {
     }
     resetUI();
   };
+}
+
+// ---- MediaRecorder fallback (for iOS etc.) ----
+function getMediaRecorderMimeType() {
+  const types = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4',
+    'audio/ogg;codecs=opus',
+  ];
+  for (const type of types) {
+    if (MediaRecorder.isTypeSupported(type)) return type;
+  }
+  return '';
+}
+
+async function startMediaRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mimeType = getMediaRecorderMimeType();
+
+    mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      // Stop all tracks to release the microphone
+      stream.getTracks().forEach((t) => t.stop());
+
+      isRecording = false;
+      talkBtn.classList.remove('recording');
+      monsterWrapper.classList.remove('listening');
+
+      if (audioChunks.length === 0) {
+        resetUI();
+        subtitle.textContent = 'Blobby hoorde niks... probeer nog eens!';
+        return;
+      }
+
+      // Show thinking while transcribing
+      btnText.textContent = 'Blobby luistert nog even...';
+      btnIcon.textContent = '🤔';
+      talkBtn.disabled = true;
+
+      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const transcript = await transcribeAudio(audioBlob, mediaRecorder.mimeType);
+
+      if (transcript) {
+        speechText.textContent = transcript;
+        speechBubble.classList.add('visible');
+        processAndSpeak(transcript);
+      } else {
+        resetUI();
+        subtitle.textContent = 'Blobby hoorde niks... probeer nog eens!';
+      }
+    };
+
+    mediaRecorder.onerror = () => {
+      stream.getTracks().forEach((t) => t.stop());
+      isRecording = false;
+      talkBtn.classList.remove('recording');
+      monsterWrapper.classList.remove('listening');
+      status.textContent = 'Oeps! Laten we het nog eens proberen!';
+      resetUI();
+    };
+
+    mediaRecorder.start();
+
+    isRecording = true;
+    talkBtn.classList.add('recording');
+    btnText.textContent = 'Blobby luistert...';
+    btnIcon.textContent = '👂';
+    monsterWrapper.classList.add('listening');
+    monsterWrapper.classList.remove('speaking', 'thinking');
+    setMouth('open');
+    subtitle.textContent = 'Praat maar! Blobby is één groot oor!';
+  } catch (err) {
+    console.error('Microphone error:', err);
+    if (err.name === 'NotAllowedError') {
+      status.textContent = 'Geef Blobby toegang tot je microfoon!';
+    } else {
+      status.textContent = 'Oeps! Blobby kan je microfoon niet vinden!';
+    }
+    resetUI();
+  }
+}
+
+function stopMediaRecording() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+}
+
+async function transcribeAudio(audioBlob, mimeType) {
+  try {
+    // Convert blob to base64
+    const buffer = await audioBlob.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+    );
+
+    const res = await fetch('/api/transcribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audio: base64, mimeType }),
+    });
+
+    if (!res.ok) throw new Error('Transcription request failed');
+
+    const { transcript } = await res.json();
+    return transcript || '';
+  } catch (err) {
+    console.error('Transcription error:', err);
+    return '';
+  }
 }
 
 // ---- Process & Speak ----
@@ -248,7 +379,7 @@ function resetUI() {
   }, 3000);
 }
 
-// ---- Confetti 🎉 ----
+// ---- Confetti ----
 function launchConfetti() {
   const emojis = ['⭐', '🌟', '✨', '💜', '💖', '🎉', '🎊', '🦄', '🌈', '🍬'];
   for (let i = 0; i < 12; i++) {
@@ -293,10 +424,18 @@ monsterWrapper.addEventListener('click', () => {
 
 function toggleRecording() {
   if (isRecording) {
-    recognition.stop();
+    if (useMediaRecorder) {
+      stopMediaRecording();
+    } else {
+      recognition.stop();
+    }
   } else {
     speechBubble.classList.remove('visible');
-    recognition.start();
+    if (useMediaRecorder) {
+      startMediaRecording();
+    } else {
+      recognition.start();
+    }
   }
 }
 
