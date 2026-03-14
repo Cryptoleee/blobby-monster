@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blobby Monster</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+</head>
+<body>
+  <!-- Fantasy Blob World Background -->
+  <div class="bg-world" id="bgWorld">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Sky gradient -->
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c9a0dc" />
+          <stop offset="40%" stop-color="#e8b4d0" />
+          <stop offset="100%" stop-color="#f0c8a8" />
+        </linearGradient>
+        <!-- Ground gradient -->
+        <linearGradient id="groundGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8c4a0" />
+          <stop offset="100%" stop-color="#d4a088" />
+        </linearGradient>
+        <!-- River gradient -->
+        <linearGradient id="riverGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#5ecce6" />
+          <stop offset="50%" stop-color="#6dd8f0" />
+          <stop offset="100%" stop-color="#4fb8d8" />
+        </linearGradient>
+        <!-- Mountain gradients -->
+        <linearGradient id="mtnFar1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c8a0d4" />
+          <stop offset="100%" stop-color="#b890c8" />
+        </linearGradient>
+        <linearGradient id="mtnFar2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d0a8c0" />
+          <stop offset="100%" stop-color="#c498b0" />
+        </linearGradient>
+        <linearGradient id="mtnMid" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8a8a0" />
+          <stop offset="100%" stop-color="#d89888" />
+        </linearGradient>
+        <linearGradient id="mtnFront" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e0a0b8" />
+          <stop offset="100%" stop-color="#d898a8" />
+        </linearGradient>
+      </defs>
+
+      <!-- Sky -->
+      <rect width="1440" height="900" fill="url(#skyGrad)" />
+
+      <!-- Far mountains (purple/lavender) -->
+      <path d="M0,420 Q120,280 240,350 Q360,200 500,300 Q580,220 680,280 Q780,160 900,300 Q1000,210 1100,280 Q1200,180 1320,320 Q1400,260 1440,300 L1440,520 L0,520 Z" fill="url(#mtnFar1)" opacity="0.6" />
+
+      <!-- Mid mountains (pinkish) with snow caps -->
+      <path d="M-50,480 Q100,300 200,380 Q320,240 460,360 Q550,280 660,340 Q780,220 920,350 Q1050,260 1160,330 Q1280,240 1400,350 L1440,350 L1440,540 L-50,540 Z" fill="url(#mtnFront)" />
+      <!-- Snow blobs on mountains -->
+      <ellipse cx="320" cy="255" rx="55" ry="22" fill="white" opacity="0.85" />
+      <ellipse cx="340" cy="250" rx="40" ry="18" fill="white" opacity="0.9" />
+      <ellipse cx="780" cy="228" rx="60" ry="24" fill="white" opacity="0.85" />
+      <ellipse cx="800" cy="222" rx="42" ry="18" fill="white" opacity="0.9" />
+      <ellipse cx="1280" cy="248" rx="50" ry="20" fill="white" opacity="0.85" />
+      <ellipse cx="1160" cy="335" rx="45" ry="16" fill="white" opacity="0.7" />
+
+      <!-- Wavy pink hills (foreground mountains, blobby/liquid look) -->
+      <path d="M0,500 Q80,440 180,470 Q300,420 420,460 Q540,430 650,455 Q780,410 900,450 Q1020,420 1140,455 Q1280,430 1440,460 L1440,600 L0,600 Z" fill="#e0a8a0" />
+      <path d="M0,520 Q100,490 220,510 Q380,470 500,500 Q640,475 760,500 Q900,470 1040,500 Q1180,480 1320,505 Q1400,490 1440,500 L1440,620 L0,620 Z" fill="#e4b4a4" />
+
+      <!-- Ground -->
+      <path d="M0,560 Q200,540 400,555 Q600,535 800,550 Q1000,540 1200,555 Q1350,545 1440,550 L1440,900 L0,900 Z" fill="url(#groundGrad)" />
+
+      <!-- River -->
+      <path d="M680,540 Q700,560 660,590 Q620,620 640,660 Q660,700 620,740 Q580,780 600,830 Q620,870 610,900" fill="none" stroke="url(#riverGrad)" stroke-width="55" stroke-linecap="round" />
+      <path d="M682,545 Q702,565 662,592 Q622,622 642,662 Q662,702 622,742 Q582,782 602,832" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" opacity="0.4" class="river-shimmer" />
+      <path d="M674,555 Q694,570 658,598 Q618,628 636,665" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.3" class="river-shimmer" style="animation-delay: -1s;" />
+
+      <!-- Blobby trees -->
+      <!-- Left blue tree -->
+      <g class="tree-top">
+        <rect x="195" y="540" width="12" height="45" rx="6" fill="#8b6b5e" />
+        <ellipse cx="200" cy="520" rx="45" ry="38" fill="#5ec0d8" />
+        <ellipse cx="190" cy="510" rx="30" ry="28" fill="#6dd0e8" />
+        <path d="M175,510 Q185,498 200,505 Q210,495 220,508" fill="none" stroke="#4aa8c0" stroke-width="2.5" opacity="0.4" />
+      </g>
+
+      <!-- Right big coral/red tree -->
+      <g class="tree-top">
+        <rect x="1090" y="510" width="14" height="55" rx="7" fill="#7a5c50" />
+        <ellipse cx="1098" cy="480" rx="58" ry="50" fill="#d87878" />
+        <ellipse cx="1110" cy="470" rx="40" ry="38" fill="#e08888" />
+        <circle cx="1075" cy="490" r="10" fill="#c06868" opacity="0.6" />
+        <circle cx="1120" cy="468" r="8" fill="#c86060" opacity="0.5" />
+        <circle cx="1095" cy="450" r="6" fill="#b85858" opacity="0.5" />
+      </g>
+
+      <!-- Small yellow tree (middle) -->
+      <g class="tree-top">
+        <rect x="740" y="528" width="9" height="32" rx="4.5" fill="#8b7b5e" />
+        <ellipse cx="745" cy="510" rx="28" ry="24" fill="#d8b850" />
+        <ellipse cx="740" cy="505" rx="20" ry="18" fill="#e0c860" />
+      </g>
+
+      <!-- Blob creatures -->
+      <!-- Purple blob (front left) -->
+      <g class="world-blob" style="animation-delay: 0s;">
+        <ellipse cx="340" cy="598" rx="5" ry="2" fill="rgba(0,0,0,0.1)" />
+        <path d="M320,580 Q322,560 330,555 Q338,550 345,555 Q352,548 358,558 Q362,565 360,580 Q350,590 340,590 Q330,590 320,580 Z" fill="#9858b8" />
+        <circle cx="333" cy="568" r="4" fill="white" />
+        <circle cx="348" cy="568" r="4" fill="white" />
+        <circle cx="334" cy="569" r="2" fill="#2d1b69" />
+        <circle cx="349" cy="569" r="2" fill="#2d1b69" />
+        <path d="M335,576 Q340,581 346,576" fill="none" stroke="#2d1b69" stroke-width="1.5" stroke-linecap="round" />
+      </g>
+
+      <!-- Red blob (left of river) -->
+      <g class="world-blob" style="animation-delay: -0.8s;">
+        <ellipse cx="520" cy="590" rx="4" ry="1.5" fill="rgba(0,0,0,0.1)" />
+        <path d="M505,575 Q508,558 515,554 Q522,550 528,556 Q534,550 538,560 Q540,570 538,578 Q530,586 522,586 Q512,586 505,575 Z" fill="#c85050" />
+        <circle cx="516" cy="564" r="3.5" fill="white" />
+        <circle cx="528" cy="564" r="3.5" fill="white" />
+        <circle cx="517" cy="565" r="1.8" fill="#2d1b69" />
+        <circle cx="529" cy="565" r="1.8" fill="#2d1b69" />
+        <path d="M519,572 Q523,576 527,572" fill="none" stroke="#2d1b69" stroke-width="1.2" stroke-linecap="round" />
+      </g>
+
+      <!-- Green blob (right of river) -->
+      <g class="world-blob" style="animation-delay: -1.5s;">
+        <ellipse cx="810" cy="582" rx="5" ry="2" fill="rgba(0,0,0,0.1)" />
+        <path d="M792,568 Q795,548 804,544 Q810,540 818,546 Q824,540 828,552 Q832,562 828,572 Q818,582 810,582 Q800,582 792,568 Z" fill="#60b868" />
+        <circle cx="804" cy="556" r="3.5" fill="white" />
+        <circle cx="816" cy="556" r="3.5" fill="white" />
+        <circle cx="805" cy="557" r="1.8" fill="#2d1b69" />
+        <circle cx="817" cy="557" r="1.8" fill="#2d1b69" />
+        <path d="M807,564 Q810,568 814,564" fill="none" stroke="#2d1b69" stroke-width="1.2" stroke-linecap="round" />
+      </g>
+
+      <!-- Tiny pink blob (far, near mountains) -->
+      <g class="world-blob" style="animation-delay: -2s;">
+        <path d="M880,520 Q882,510 887,508 Q892,506 896,510 Q900,508 902,514 Q904,520 900,524 Q894,528 888,528 Q882,528 880,520 Z" fill="#d080b0" />
+        <circle cx="888" cy="515" r="1.8" fill="white" />
+        <circle cx="895" cy="515" r="1.8" fill="white" />
+        <circle cx="888" cy="515.5" r="0.9" fill="#2d1b69" />
+        <circle cx="895" cy="515.5" r="0.9" fill="#2d1b69" />
+      </g>
+
+      <!-- Colorful pebbles / candy rocks scattered -->
+      <ellipse cx="290" cy="610" rx="8" ry="5" fill="#c080d0" opacity="0.7" />
+      <ellipse cx="450" cy="595" rx="6" ry="4" fill="#60b8d0" opacity="0.7" />
+      <ellipse cx="960" cy="575" rx="7" ry="4" fill="#d8a050" opacity="0.7" />
+      <ellipse cx="1200" cy="590" rx="9" ry="5" fill="#c07898" opacity="0.6" />
+      <ellipse cx="380" cy="630" rx="5" ry="3" fill="#70c0a0" opacity="0.6" />
+      <ellipse cx="1050" cy="600" rx="6" ry="3.5" fill="#b888d0" opacity="0.6" />
+
+      <!-- Striped candy caterpillar things -->
+      <g transform="translate(150, 620) rotate(-10)">
+        <ellipse cx="0" cy="0" rx="8" ry="6" fill="#d85858" />
+        <ellipse cx="12" cy="0" rx="7" ry="5.5" fill="#e8c850" />
+        <ellipse cx="22" cy="0" rx="7" ry="5.5" fill="#d85858" />
+        <ellipse cx="32" cy="0" rx="7" ry="5" fill="#e8c850" />
+        <ellipse cx="40" cy="0" rx="6" ry="4.5" fill="#d85858" />
+      </g>
+
+      <g transform="translate(1000, 610) rotate(5)">
+        <ellipse cx="0" cy="0" rx="6" ry="4.5" fill="#a070c8" />
+        <ellipse cx="10" cy="0" rx="5.5" ry="4" fill="#60b8d0" />
+        <ellipse cx="18" cy="0" rx="5.5" ry="4" fill="#a070c8" />
+        <ellipse cx="26" cy="0" rx="5" ry="3.5" fill="#60b8d0" />
+      </g>
+
+      <!-- Stacked blob rocks -->
+      <g transform="translate(1250, 560)">
+        <ellipse cx="0" cy="30" rx="14" ry="8" fill="#d0a870" />
+        <ellipse cx="0" cy="18" rx="12" ry="7" fill="#c8a060" />
+        <ellipse cx="0" cy="8" rx="9" ry="6" fill="#d8b878" />
+        <ellipse cx="0" cy="0" rx="6" ry="4" fill="#e0c888" />
+      </g>
+
+      <!-- Clouds -->
+      <g class="cloud cloud1">
+        <ellipse cx="200" cy="100" rx="70" ry="30" fill="white" opacity="0.7" />
+        <ellipse cx="230" cy="90" rx="50" ry="24" fill="white" opacity="0.8" />
+        <ellipse cx="175" cy="95" rx="40" ry="20" fill="white" opacity="0.6" />
+      </g>
+      <g class="cloud cloud2">
+        <ellipse cx="800" cy="130" rx="55" ry="22" fill="white" opacity="0.6" />
+        <ellipse cx="825" cy="122" rx="40" ry="18" fill="white" opacity="0.7" />
+      </g>
+      <g class="cloud cloud3">
+        <ellipse cx="1200" cy="80" rx="60" ry="25" fill="white" opacity="0.65" />
+        <ellipse cx="1230" cy="72" rx="42" ry="20" fill="white" opacity="0.7" />
+        <ellipse cx="1175" cy="76" rx="35" ry="16" fill="white" opacity="0.55" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="app-container">
+    <h1 class="title">Blobby Monster</h1>
+    <p class="subtitle" id="subtitle">Tik op mij en zeg iets geks!</p>
+
+    <!-- The Blobby Monster SVG character -->
+    <div class="monster-wrapper" id="monsterWrapper">
+      <div class="monster-shadow"></div>
+      <svg
+        id="blobby"
+        class="monster"
+        viewBox="0 0 300 300"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <radialGradient id="bodyGrad" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#b388ff" />
+            <stop offset="100%" stop-color="#7c4dff" />
+          </radialGradient>
+          <radialGradient id="cheekL" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff80ab" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#ff80ab" stop-opacity="0" />
+          </radialGradient>
+          <radialGradient id="cheekR" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff80ab" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#ff80ab" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+
+        <!-- Body blob -->
+        <path id="blobPath" fill="url(#bodyGrad)">
+          <animate
+            attributeName="d"
+            dur="3s"
+            repeatCount="indefinite"
+            values="
+              M150,30 C210,30 270,80 270,150 C270,220 220,270 150,270 C80,270 30,220 30,150 C30,80 90,30 150,30 Z;
+              M150,25 C220,35 275,90 265,155 C255,225 210,275 145,272 C75,268 25,215 32,148 C38,78 85,20 150,25 Z;
+              M150,30 C210,30 270,80 270,150 C270,220 220,270 150,270 C80,270 30,220 30,150 C30,80 90,30 150,30 Z
+            "
+          />
+        </path>
+
+        <!-- Left eye white -->
+        <ellipse cx="115" cy="125" rx="28" ry="32" fill="white" class="eye-white" />
+        <!-- Right eye white -->
+        <ellipse cx="185" cy="125" rx="28" ry="32" fill="white" class="eye-white" />
+
+        <!-- Left pupil -->
+        <circle id="pupilL" cx="118" cy="128" r="14" fill="#2d1b69" />
+        <circle cx="110" cy="120" r="5" fill="white" opacity="0.8" />
+
+        <!-- Right pupil -->
+        <circle id="pupilR" cx="188" cy="128" r="14" fill="#2d1b69" />
+        <circle cx="180" cy="120" r="5" fill="white" opacity="0.8" />
+
+        <!-- Cheeks -->
+        <ellipse cx="80" cy="165" rx="22" ry="14" fill="url(#cheekL)" />
+        <ellipse cx="220" cy="165" rx="22" ry="14" fill="url(#cheekR)" />
+
+        <!-- Mouth -->
+        <path
+          id="mouth"
+          d="M120,185 Q150,215 180,185"
+          stroke="#2d1b69"
+          stroke-width="4"
+          fill="none"
+          stroke-linecap="round"
+        />
+
+        <!-- Little horns/antennae -->
+        <ellipse cx="100" cy="42" rx="10" ry="18" fill="#ce93d8" transform="rotate(-15, 100, 42)" />
+        <ellipse cx="200" cy="42" rx="10" ry="18" fill="#ce93d8" transform="rotate(15, 200, 42)" />
+        <circle cx="100" cy="26" r="6" fill="#f48fb1" />
+        <circle cx="200" cy="26" r="6" fill="#f48fb1" />
+      </svg>
+
+      <!-- Sound wave rings (shown when speaking) -->
+      <div class="sound-waves" id="soundWaves">
+        <div class="wave wave1"></div>
+        <div class="wave wave2"></div>
+        <div class="wave wave3"></div>
+      </div>
+
+      <!-- Listening indicator -->
+      <div class="listening-dots" id="listeningDots">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <!-- What the kid said -->
+    <div class="speech-bubble" id="speechBubble">
+      <p id="speechText"></p>
+    </div>
+
+    <!-- Tap button -->
+    <button class="talk-btn" id="talkBtn">
+      <span class="btn-icon">🎤</span>
+      <span class="btn-text">Praat met Blobby!</span>
+    </button>
+
+    <!-- Fun fact / status -->
+    <p class="status" id="status"></p>
+  </div>
+
+  <audio id="audioPlayer" preload="none"></audio>
+  <script src="app.js"></script>
+</body>
+</html>

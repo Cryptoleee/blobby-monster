@@ -1,0 +1,512 @@
+/* ============================================
+   BLOBBY MONSTER — Playful Kids Voice App
+   ============================================ */
+
+:root {
+  --purple: #7c4dff;
+  --purple-light: #b388ff;
+  --pink: #ff80ab;
+  --yellow: #ffd54f;
+  --green: #69f0ae;
+  --blue: #40c4ff;
+  --orange: #ffab40;
+  --bg-top: #e1bee7;
+  --bg-bottom: #bbdefb;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  background: #d8a4c8;
+  font-family: 'Fredoka', sans-serif;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---- Background World ---- */
+.bg-world {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-world svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Floating clouds */
+.cloud {
+  animation: cloudFloat linear infinite;
+}
+
+.cloud1 { animation-duration: 25s; }
+.cloud2 { animation-duration: 35s; animation-delay: -10s; }
+.cloud3 { animation-duration: 30s; animation-delay: -18s; }
+
+@keyframes cloudFloat {
+  0%   { transform: translateX(-150px); }
+  100% { transform: translateX(calc(100vw + 150px)); }
+}
+
+/* Gentle blob creature idle animations */
+.world-blob {
+  animation: blobIdle 3s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.world-blob:nth-child(odd) {
+  animation-duration: 2.5s;
+}
+
+@keyframes blobIdle {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50%      { transform: scaleY(0.94) scaleX(1.04); }
+}
+
+/* River shimmer */
+.river-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.8; }
+}
+
+/* Tree sway */
+.tree-top {
+  animation: treeSway 4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.tree-top:nth-of-type(even) {
+  animation-duration: 5s;
+  animation-delay: -1s;
+}
+
+@keyframes treeSway {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(1.5deg); }
+  75%      { transform: rotate(-1.5deg); }
+}
+
+/* ---- App Container ---- */
+.app-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 20px 30px;
+  max-width: 500px;
+  width: 100%;
+}
+
+/* ---- Title ---- */
+.title {
+  font-family: 'Bubblegum Sans', cursive;
+  font-size: 3.2rem;
+  color: var(--purple);
+  text-shadow: 3px 3px 0 var(--pink), 6px 6px 0 rgba(0, 0, 0, 0.05);
+  letter-spacing: 2px;
+  animation: titleBounce 2s ease-in-out infinite;
+  margin-bottom: 4px;
+}
+
+@keyframes titleBounce {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: #6a1b9a;
+  margin-bottom: 20px;
+  font-weight: 400;
+  text-align: center;
+  min-height: 1.5em;
+  transition: opacity 0.3s;
+}
+
+/* ---- Monster Wrapper ---- */
+.monster-wrapper {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.monster-wrapper:active {
+  transform: scale(0.95);
+}
+
+.monster {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 20px rgba(124, 77, 255, 0.3));
+  transition: filter 0.3s;
+}
+
+.monster-shadow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 20px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.15), transparent);
+  border-radius: 50%;
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: translateX(-50%) scaleX(1); }
+  50% { transform: translateX(-50%) scaleX(0.85); }
+}
+
+/* ---- States ---- */
+
+/* Listening state */
+.monster-wrapper.listening .monster {
+  filter: drop-shadow(0 8px 30px rgba(105, 240, 174, 0.5));
+  animation: listenPulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes listenPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+/* Speaking state — gentle wobble, cute not chaotic */
+.monster-wrapper.speaking .monster {
+  filter: drop-shadow(0 8px 30px rgba(255, 128, 171, 0.5));
+  animation: speakWobble 0.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes speakWobble {
+  0%, 100% { transform: rotate(0deg)  scaleX(1)    scaleY(1);    }
+  25%      { transform: rotate(2deg)  scaleX(1.04) scaleY(0.96); }
+  50%      { transform: rotate(0deg)  scaleX(0.96) scaleY(1.04); }
+  75%      { transform: rotate(-2deg) scaleX(1.03) scaleY(0.97); }
+}
+
+/* Gentle mouth open/close while speaking */
+.monster-wrapper.speaking #mouth {
+  animation: mouthFlap 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes mouthFlap {
+  0%   { transform: scaleY(1);   }
+  100% { transform: scaleY(1.2); }
+}
+
+/* Antenna tips gently bob */
+.monster-wrapper.speaking circle[cy="26"] {
+  animation: tipBob 1s ease-in-out infinite alternate;
+}
+
+.monster-wrapper.speaking circle[cy="26"]:last-of-type {
+  animation-delay: 0.3s;
+}
+
+@keyframes tipBob {
+  0%   { transform: translateY(0);    }
+  100% { transform: translateY(-3px); }
+}
+
+/* Thinking / loading state */
+.monster-wrapper.thinking .monster {
+  animation: thinkSway 1.2s ease-in-out infinite;
+}
+
+@keyframes thinkSway {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+/* ---- Listening Dots ---- */
+.listening-dots {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.monster-wrapper.listening .listening-dots {
+  opacity: 1;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.15s; background: var(--yellow); }
+.dot:nth-child(3) { animation-delay: 0.3s; background: var(--pink); }
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-16px); }
+}
+
+/* ---- Sound Waves ---- */
+.sound-waves {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.monster-wrapper.speaking .sound-waves {
+  opacity: 1;
+}
+
+.wave {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--pink);
+  border-radius: 50%;
+  animation: waveExpand 1.5s ease-out infinite;
+}
+
+.wave1 { width: 200px; height: 200px; animation-delay: 0s; }
+.wave2 { width: 200px; height: 200px; animation-delay: 0.4s; }
+.wave3 { width: 200px; height: 200px; animation-delay: 0.8s; }
+
+@keyframes waveExpand {
+  0% {
+    width: 200px;
+    height: 200px;
+    opacity: 0.6;
+    border-color: var(--pink);
+  }
+  100% {
+    width: 350px;
+    height: 350px;
+    opacity: 0;
+    border-color: var(--orange);
+  }
+}
+
+/* ---- Speech Bubble ---- */
+.speech-bubble {
+  background: white;
+  border-radius: 24px;
+  padding: 16px 24px;
+  max-width: 320px;
+  min-height: 0;
+  box-shadow: 0 4px 20px rgba(124, 77, 255, 0.15);
+  position: relative;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 3px solid var(--purple-light);
+}
+
+.speech-bubble.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 14px solid var(--purple-light);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid white;
+}
+
+#speechText {
+  font-size: 1.1rem;
+  color: #4a148c;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ---- Talk Button ---- */
+.talk-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 36px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--purple), #e040fb);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 25px rgba(124, 77, 255, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.talk-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.talk-btn:hover::after {
+  left: 100%;
+}
+
+.talk-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 30px rgba(124, 77, 255, 0.5), 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.talk-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.talk-btn.recording {
+  background: linear-gradient(135deg, #f44336, #ff5722);
+  animation: recordPulse 1s ease-in-out infinite;
+}
+
+@keyframes recordPulse {
+  0%, 100% { box-shadow: 0 6px 25px rgba(244, 67, 54, 0.4); }
+  50% { box-shadow: 0 6px 35px rgba(244, 67, 54, 0.7); }
+}
+
+.talk-btn:disabled {
+  background: linear-gradient(135deg, #bdbdbd, #9e9e9e);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon {
+  font-size: 1.4rem;
+}
+
+/* ---- Status ---- */
+.status {
+  font-size: 0.95rem;
+  color: #7b1fa2;
+  margin-top: 16px;
+  text-align: center;
+  min-height: 1.4em;
+  opacity: 0.8;
+}
+
+/* ---- Confetti particles on successful playback ---- */
+.confetti {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  font-size: 1.6rem;
+  animation: confettiFall linear forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(80vh) rotate(720deg) scale(0.3);
+  }
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  .title {
+    font-size: 2.4rem;
+  }
+
+  .monster-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+
+  .talk-btn {
+    padding: 14px 28px;
+    font-size: 1.1rem;
+  }
+}
+
+/* ---- Eye blink animation ---- */
+.eye-white {
+  animation: blink 4s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 45%, 55%, 100% { ry: 32; }
+  50% { ry: 3; }
+}
+
+/* ---- Stars that appear on tap ---- */
+.tap-star {
+  position: absolute;
+  pointer-events: none;
+  font-size: 1.5rem;
+  animation: starPop 0.6s ease-out forwards;
+}
+
+@keyframes starPop {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.5) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(180deg);
+  }
+}
