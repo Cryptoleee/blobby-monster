@@ -202,19 +202,34 @@ function stopMediaRecording() {
   }
 }
 
+function decodeAudioCompat(audioContext, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+  });
+}
+
+function renderOfflineCompat(offlineCtx) {
+  return new Promise((resolve, reject) => {
+    offlineCtx.oncomplete = (e) => resolve(e.renderedBuffer);
+    offlineCtx.onerror = reject;
+    offlineCtx.startRendering();
+  });
+}
+
 async function convertToLinear16(audioBlob) {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const arrayBuffer = await audioBlob.arrayBuffer();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const audioBuffer = await decodeAudioCompat(audioContext, arrayBuffer);
 
   // Downsample to 16kHz mono (optimal for speech recognition)
   const targetSampleRate = 16000;
-  const offlineCtx = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+  const length = Math.ceil(audioBuffer.duration * targetSampleRate);
+  const offlineCtx = new OfflineAudioContext(1, length, targetSampleRate);
   const source = offlineCtx.createBufferSource();
   source.buffer = audioBuffer;
   source.connect(offlineCtx.destination);
   source.start();
-  const resampled = await offlineCtx.startRendering();
+  const resampled = await renderOfflineCompat(offlineCtx);
 
   // Convert float samples to 16-bit PCM
   const channelData = resampled.getChannelData(0);
