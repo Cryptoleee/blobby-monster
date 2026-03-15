@@ -154,7 +154,7 @@ async function startMediaRecording() {
       talkBtn.disabled = true;
 
       const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-      const transcript = await transcribeAudio(audioBlob, mediaRecorder.mimeType);
+      const transcript = await transcribeAudio(audioBlob);
 
       if (transcript) {
         speechText.textContent = transcript;
@@ -202,18 +202,47 @@ function stopMediaRecording() {
   }
 }
 
-async function transcribeAudio(audioBlob, mimeType) {
+async function convertToLinear16(audioBlob) {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const arrayBuffer = await audioBlob.arrayBuffer();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+  // Downsample to 16kHz mono (optimal for speech recognition)
+  const targetSampleRate = 16000;
+  const offlineCtx = new OfflineAudioContext(1, audioBuffer.duration * targetSampleRate, targetSampleRate);
+  const source = offlineCtx.createBufferSource();
+  source.buffer = audioBuffer;
+  source.connect(offlineCtx.destination);
+  source.start();
+  const resampled = await offlineCtx.startRendering();
+
+  // Convert float samples to 16-bit PCM
+  const channelData = resampled.getChannelData(0);
+  const pcm = new Int16Array(channelData.length);
+  for (let i = 0; i < channelData.length; i++) {
+    const s = Math.max(-1, Math.min(1, channelData[i]));
+    pcm[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+  }
+
+  audioContext.close();
+
+  // Convert to base64
+  const bytes = new Uint8Array(pcm.buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function transcribeAudio(audioBlob) {
   try {
-    // Convert blob to base64
-    const buffer = await audioBlob.arrayBuffer();
-    const base64 = btoa(
-      new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-    );
+    const base64Audio = await convertToLinear16(audioBlob);
 
     const res = await fetch('/api/transcribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio: base64, mimeType }),
+      body: JSON.stringify({ audio: base64Audio }),
     });
 
     if (!res.ok) throw new Error('Transcription request failed');

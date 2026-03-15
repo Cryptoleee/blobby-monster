@@ -99,21 +99,10 @@ app.post('/api/respond', async (req, res) => {
 
 // ---- Transcribe audio via Google Cloud Speech-to-Text ----
 app.post('/api/transcribe', async (req, res) => {
-  const { audio, mimeType } = req.body;
+  const { audio } = req.body;
 
   if (!audio) {
     return res.status(400).json({ error: 'No audio provided' });
-  }
-
-  let encoding = 'WEBM_OPUS';
-  let sampleRateHertz = 48000;
-
-  if (mimeType && mimeType.includes('mp4')) {
-    encoding = 'MP4';
-    sampleRateHertz = 44100;
-  } else if (mimeType && mimeType.includes('ogg')) {
-    encoding = 'OGG_OPUS';
-    sampleRateHertz = 48000;
   }
 
   try {
@@ -124,8 +113,8 @@ app.post('/api/transcribe', async (req, res) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           config: {
-            encoding,
-            sampleRateHertz,
+            encoding: 'LINEAR16',
+            sampleRateHertz: 16000,
             languageCode: 'nl-NL',
             model: 'latest_short',
             enableAutomaticPunctuation: true,
